@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Signup Page</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .signup-form {
+    max-width: 400px;
+    color:white;
+    margin: 50px auto;
+    border-radius: 2em;
+    margin-top: 10em;
+    padding: 20px;
+    background-color:black;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  body {
+    background-image: linear-gradient(to right, rgb(9, 144, 132) , rgb(0, 0, 0));
+  }
+  .form-group label {
+    font-weight: bold;
+  }
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group input[type="password"] {
+    border-radius: 0.8em;
+  }
+  .form-group button[type="submit"] {
+    background-color:rgb(9, 144, 132);
+    border-radius: 0.8em;
+  }
+  .form-group button:hover{
+    background-color: rgb(8, 114, 106);
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 mx-auto">
+        <form class="signup-form" action="/route/signup" method="POST">
+          <h2 class="text-center mb-4">Sign Up</h2>
+          <% if (locals.errorMessage) { %>
+            <div class="alert alert-danger text-center">
+                <%= errorMessage %>
+            </div>
+          <% } %>
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+          </div>
+          <p class="text-center">Already have an account?<a href="/route/login">Log in</a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

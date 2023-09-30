@@ -1,0 +1,165 @@
+<%- include('header') -%>
+
+<div class="container mt-4">
+  <h1 class="mb-4 admin-heading text-center">Admin Panel</h1>
+  <div class="d-flex justify-content-between mb-4">
+    <div class="d-flex align-items-center">
+      <input type="text" id="searchInput" class="form-control mr-2" placeholder="Search user..." />
+      <button type="button" class="btn btn-dark" id="searchButton">Search</button>
+    </div>
+    <div id="suggestionsList" class="suggestions-list"></div>    
+  </div>
+  <table class="table table-bordered table-thick">
+    <thead class="thead-dark">
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Admin</th>
+        <th>Edit</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody id="userTableBody">
+      <% allUsers.forEach(user => { %>
+      <tr>
+        <td>
+          <span class="editable" data-field="username" data-value="<%= user.username %>">
+            <%= user.username %>
+          </span>
+          <input type="text" class="form-control d-none" name="username" value="<%= user.username %>" />
+        </td>
+        <td>
+          <span class="editable" data-field="email" data-value="<%= user.email %>">
+            <%= user.email %>
+          </span>
+          <input type="text" class="form-control d-none email" name="email" value="<%= user.email %>" />
+        </td>
+        <td>
+          <form method="post" action="/route/admin/update-role/<%= user._id %>">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" name="isAdmin" <%= user.isAdmin ? 'checked' : '' %> />
+              <label class="form-check-label" for="isAdmin"></label>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Admin</button>
+          </form>
+        </td>
+        <td>
+          <button type="button" class="btn btn-success edit-btn" data-user-id="<%= user._id %>">Edit</button>
+        </td>
+        <td>
+          <button type="button" class="btn btn-danger delete-btn" data-user-id="<%= user._id %>">Delete</button>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+  const editButtons = document.querySelectorAll('.edit-btn');
+  editButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const userId = button.getAttribute('data-user-id');
+      const userRow = button.parentNode.parentNode;
+      const editableFields = userRow.querySelectorAll('.editable');
+      const inputFields = userRow.querySelectorAll('input');
+      const isEditing = button.textContent === 'Edit';
+      // Toggle visibility of editable fields
+      editableFields.forEach(field => {
+        field.classList.toggle('d-none', isEditing);
+      });
+      // Toggle visibility of input fields
+      inputFields.forEach(field => {
+        field.classList.toggle('d-none', !isEditing);
+      });
+      // If the button says "Edit", change it to "Save"; otherwise, change it back to "Edit"
+      button.textContent = isEditing ? 'Save' : 'Edit';
+      // If the button says "Save", submit the form to update the user data
+      if (!isEditing) {
+           const username = userRow.querySelector('input[name="username"]').value;
+           const email = userRow.querySelector('input[name="email"]').value;
+           const isAdmin = userRow.querySelector('input[name="isAdmin"]').checked;
+           const userData = {
+             username: username,
+             email: email,
+             isAdmin: isAdmin,
+           };
+           fetch(`/route/admin/edit/${userId}`, {
+             method: 'POST',
+             headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+          })
+          .then(response => response.json())
+          .then(data => {
+          // Handle the response, e.g., show a success message or update the UI
+          console.log(data);
+          location.reload(); // Refresh the page after successful update (you can update the UI instead)
+         })
+        .catch(error => {
+        // Handle any error that occurred during the AJAX request
+        console.error('Error updating user:', error);
+        alert('Error updating user. Please try again later.');
+       });
+      }
+    });
+  });
+});
+// JavaScript code for handling the delete button click
+  document.addEventListener('DOMContentLoaded', () => {
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const userId = button.getAttribute('data-user-id');
+        const confirmDelete = confirm('Are you sure you want to delete this user?');
+        if (confirmDelete) {
+          // If the admin confirms the deletion, make an AJAX request to the server to delete the user
+          fetch(`/route/admin/delete/${userId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            // Handle the response, e.g., show a success message or update the UI
+            console.log(data);
+            location.reload(); // Refresh the page after successful deletion (you can update the UI instead)
+          })
+          .catch(error => {
+            // Handle any error that occurred during the AJAX request
+            console.error('Error deleting user:', error);
+            alert('Error deleting user. Please try again later.');
+          });
+        }
+      });
+    });
+  });
+  //Search user
+  $(document).ready(function () {
+  $('#searchButton').on('click', function () {
+    searchUser();
+  });
+  $('#searchInput').on('input', function () {
+    searchUser();
+  });
+ });
+ function searchUser() {
+  const searchInputValue = $('#searchInput').val().toLowerCase().trim();
+  const tableRows = $('#userTableBody tr');
+  tableRows.each(function () {
+    const username = $(this).find('.editable[data-field="username"]').text().toLowerCase();
+    const isVisible = username.includes(searchInputValue) || searchInputValue === '';
+    $(this).css('display', isVisible ? '' : 'none');
+  });
+}
+
+</script>
+
+<%- include('footer') -%>

@@ -1,0 +1,15 @@
+<%- include('header') -%>
+
+<div class="text-center center-div mt-5"id="login">
+    <div class="box1 container w-25 border py-5 mt-5">
+        <h3>WELCOME TO THE HOME PAGE</h3>
+        <h5><%= locals.user?user:"User" %></h5>
+        <button class="btn buttn rounded-pi"><a href="/route/logout">Logout</a></button>
+    </div>
+</div>
+
+<%- include('footer') -%>
+
+
+
+
